@@ -1,0 +1,24 @@
+# Local secrets and deployment-only configuration
+config.local.js
+.env
+.env.*
+!.env.example
+
+# Dependencies and local tooling
+node_modules/
+.npm/
+.DS_Store
+
+# Local test/runtime output
+*.log
+*.tmp
+.vscode/
+.idea/
+
+# Generated local QR assets and archives
+互动网站素材/
+互动网站_运行包.zip
+
+# Supabase deployment-only values
+supabase/host-token.txt
+supabase/schema.local.sql
