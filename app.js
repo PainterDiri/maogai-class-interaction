@@ -2,7 +2,21 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 const cfg = window.APP_CONFIG;
 if (!cfg?.supabaseUrl || cfg.supabaseUrl.includes('YOUR_')) throw new Error('请先配置 config.js');
 export const supabase = createClient(cfg.supabaseUrl, cfg.supabaseAnonKey);
-export const sessionId = new URLSearchParams(location.search).get('session') || cfg.defaultSessionId || 'main';
+
+// 兼容早期错误链接：session=main%26host=TOKEN
+// 正确格式应为 ?session=main&host=TOKEN，但旧二维码/旧链接也必须继续可用。
+export function getAppParams(){
+  const params = new URLSearchParams(location.search);
+  let session = params.get('session') || cfg.defaultSessionId || 'main';
+  let host = params.get('host') || '';
+  const embeddedHost = session.indexOf('&host=');
+  if (!host && embeddedHost >= 0) {
+    host = session.slice(embeddedHost + '&host='.length);
+    session = session.slice(0, embeddedHost);
+  }
+  return { sessionId: decodeURIComponent(session), host: decodeURIComponent(host) };
+}
+export const {sessionId} = getAppParams();
 export const labels = { A:'军事保护', B:'土地与群众', C:'基层组织' };
 export function participantId(){let id=localStorage.getItem(`participant:${sessionId}`);if(!id){id=crypto.randomUUID?.()||Math.random().toString(36).slice(2);localStorage.setItem(`participant:${sessionId}`,id)}return id}
 export async function fetchState(){const {data,error}=await supabase.from('session_state').select('*').eq('id',sessionId).single();if(error)throw error;return data}
